@@ -46,6 +46,7 @@
 //! event and remove the expired peer from the list of known peers.
 
 use futures::{prelude::*, select};
+use libp2p::Multiaddr;
 use libp2p::{
     core::muxing::StreamMuxerBox,
     gossipsub, identity, mdns,
@@ -132,6 +133,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .build();
 
     println!("swarm has been built");
+
+    // Dial the peer identified by the multi-address given as the second
+    // command-line argument, if any.
+    if let Some(addr) = std::env::args().nth(1) {
+        let remote: Multiaddr = addr.parse()?;
+        swarm.dial(remote)?;
+        println!("Dialed {addr}")
+    }
 
     // Read full lines from stdin
     let mut stdin = codec::FramedRead::new(io::stdin(), codec::LinesCodec::new()).fuse();
